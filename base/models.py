@@ -3,15 +3,17 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 import uuid
+import datetime
 
 
 class User(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     User_Id = models.UUIDField(
         primary_key=True, default=uuid.uuid4, editable=False)
+    Username = models.CharField(max_length=200, unique=True)
 
-    # def ___str__(self):
-    #     return self.Title
+    def ___str__(self):
+        return self.Username
 
 
 class Task(models.Model):
@@ -36,7 +38,7 @@ class Sub_Task (models.Model):
         max_length=500, unique=True, blank=False, null=False)
     Description = models.TextField()
     Date_created = models.DateTimeField(auto_now_add=True)
-    Due_date = models.DurationField()
+    Due_date = models.DurationField(default=datetime.timedelta(days=7))
     Last_modified = models.DateTimeField(auto_now=True)
     Completed = models.BooleanField(default=False)
     Reminder = models.BooleanField(default=True)
