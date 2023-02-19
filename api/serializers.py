@@ -12,7 +12,7 @@ class UserSerializer(ModelSerializer):
 class TaskSerializer(ModelSerializer):
     class Meta:
         model = Task
-        fields = ['Title', 'Description',
+        fields = ['Task_Id', 'Title', 'Description',
                   'Date_Created', 'Last_Modified', 'Completed']
 
 

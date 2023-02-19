@@ -6,7 +6,7 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from django.contrib.auth.models import User
-from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_204_NO_CONTENT, HTTP_200_OK
 # ============================================================================#
 
 
@@ -26,20 +26,40 @@ def index(request):
     return Response(api_endpoints)
 
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAdminUser])
 def getTasks(request):
-    if request.method == 'GET':
-        tasks = Task.objects.all()
-        serializer = TaskSerializer(tasks, many=True)
-        return Response(serializer.data)
-    elif request.method == 'POST':
-        serializer = TaskSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=HTTP_201_CREATED)
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+    tasks = Task.objects.all()
+    serializer = TaskSerializer(tasks, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAdminUser])
+def addTask(request):
+    serializer = TaskSerializer(data=request.data)
+    if serializer.is_valid():
+        print(request.data)
+        serializer.save()
+        return Response(serializer.data, status=HTTP_201_CREATED)
+    return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE', 'GET'])
+# @authentication_classes([SessionAuthentication])
+# @permission_classes([IsAdminUser])
+def modifyTask(request, id):
+    if request.method == 'DELETE':
+        task = Task.objects.get(Task_Id=id)
+        serializer = TaskSerializer(task)
+        task.delete()
+        return Response(serializer.data, status=HTTP_204_NO_CONTENT)
+    elif request.method == 'GET':
+        task = Task.objects.get(Task_Id=id)
+        serializer = TaskSerializer(task)
+        return Response(serializer.data, status=HTTP_200_OK)
 
 
 @api_view(['GET'])
