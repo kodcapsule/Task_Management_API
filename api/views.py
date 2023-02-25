@@ -26,58 +26,54 @@ def index(request):
     return Response(api_endpoints)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAdminUser])
 def getTasks(request):
-    tasks = Task.objects.all()
-    serializer = TaskSerializer(tasks, many=True)
-    return Response(serializer.data)
-
-
-@api_view(['POST'])
-@authentication_classes([SessionAuthentication])
-@permission_classes([IsAdminUser])
-def addTask(request):
-    serializer = TaskSerializer(data=request.data)
-    if serializer.is_valid():
-        print(request.data)
-        serializer.save()
-        return Response(serializer.data, status=HTTP_201_CREATED)
+    if request.method == 'GET':
+        tasks = Task.objects.all()
+        serializer = TaskSerializer(tasks, many=True)
+        return Response(serializer.data)
+    elif request.method == 'POST':
+        serializer = TaskSerializer(data=request.data)
+        if serializer.is_valid():
+            print(request.data)
+            serializer.save()
+            return Response(serializer.data, status=HTTP_201_CREATED)
     return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 
-@api_view(['DELETE', 'GET'])
-# @authentication_classes([SessionAuthentication])
-# @permission_classes([IsAdminUser])
+@api_view(['DELETE', 'PUT', 'PATCH'])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAdminUser])
 def modifyTask(request, id):
     if request.method == 'DELETE':
         task = Task.objects.get(Task_Id=id)
         serializer = TaskSerializer(task)
         task.delete()
         return Response(serializer.data, status=HTTP_204_NO_CONTENT)
-    elif request.method == 'GET':
+    elif request.method == 'PUT':
         task = Task.objects.get(Task_Id=id)
-        serializer = TaskSerializer(task)
-        return Response(serializer.data, status=HTTP_200_OK)
+        serializer = TaskSerializer(task, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=HTTP_200_OK)
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
+# @authentication_classes([BasicAuthentication])
 def getUsers(request):
-    if request.user:
-        users = User.objects.filter(username=request.user)
-        serializer = UserSerializer(users, many=True)
-        return Response(serializer.data)
-    else:
-        return Response(status=HTTP_400_BAD_REQUEST)
+    users = User.objects.all()
+    serializer = UserSerializer(users, many=True)
+    print(request.auth)
+    return Response(serializer.data)
 
 
-@api_view(['GET', 'PUT'])
-@authentication_classes([BasicAuthentication])
-@permission_classes([IsAuthenticated])
+@api_view(['GET'])
 def getSubTasks(request):
     if request.method == 'GET':
-        sub_tasks = Sub_Task.objects.filter(asigned_to=request.user)
+        sub_tasks = Sub_Task.objects.all()
         serializer = SubTaskSerializer(sub_tasks, many=True)
         return Response(serializer.data)
     elif (request.method == 'PUT'):
