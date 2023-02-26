@@ -20,4 +20,4 @@ class SubTaskSerializer(ModelSerializer):
     class Meta:
         model = Sub_Task
         fields = ['Sub_Task_Id', 'Title', 'Description',
-                  'Date_created', 'Due_date', 'Last_modified']
+                  'Date_created', 'Due_date', 'Last_modified', 'asigned_to']
